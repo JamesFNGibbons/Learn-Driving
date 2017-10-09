@@ -107,8 +107,7 @@ public class AccountManager {
 	}
 	
 	protected void create_account(String text, String text2, String text3) {
-		// TODO Auto-generated method stub
-		
+		Database db = new Database();
 	}
 
 	/**

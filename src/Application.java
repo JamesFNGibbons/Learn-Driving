@@ -3,6 +3,7 @@ import javax.swing.JFrame;
 public class Application {
 		
 	public WindowManager windowManager;
+	public Database database;
 	public boolean is_loggedin = false;
 
 	/*
