@@ -24,6 +24,7 @@ public class Database {
 		// Attempt a connection
 		try{
 			this.connection = DriverManager.getConnection(db_uri);
+			System.out.println("Loaded database file.");
 		}
 		catch(SQLException e){
 			System.out.print(e.getMessage());

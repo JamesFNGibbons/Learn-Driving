@@ -16,7 +16,8 @@ public class Application {
 		
 	public WindowManager windowManager;
 	public Database database;
-	public boolean is_loggedin = false;
+	private boolean is_loggedin = false;
+	private String username = null;
 
 	/*
 	 * The constructor function
@@ -26,6 +27,40 @@ public class Application {
 		Application app = new Application();
 		app.init_application();
 		app.load_models();
+	}
+	
+	/**
+	 * Function used when the user is loggein to the system
+	 * @param The login status of the user.
+	 */
+	public void set_loggedin(boolean status){
+		this.is_loggedin = status;
+	}
+	
+	/**
+	 * Function used to set the username of the loggedin user.
+	 * @param The username
+	 */
+	public void set_username(String username){
+		this.username = username;
+	}
+	
+	/**
+	 * Function used to get the username of the current user
+	 * @return 
+	 * @return The username
+	 */
+	public String get_username(){
+		return this.username;
+	}
+	
+	/**
+	 * Function called when the login process is complete.
+	 */
+	public void login_complete(){
+		System.out.println("Login process complete.");
+		// Display the MasterControlWindow
+		MasterControlWindow mainWindow = new MasterControlWindow();
 	}
 	
 	public void init_application(){

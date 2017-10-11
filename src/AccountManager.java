@@ -1,4 +1,5 @@
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -6,7 +7,11 @@ import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 
+import javax.management.Query;
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -22,9 +27,24 @@ public class AccountManager {
 	
 	private Object root;
 	private JFrame login_window;
+	private JLabel login_title = new JLabel("Please Sign In Below", SwingConstants.LEFT);
 	
 	public AccountManager(Object app){
 		this.root = app;
+	}
+	
+	/**
+	 * Function used when the users login is correct.
+	 */
+	public void login_correct(String username){
+		// Close the login window.
+		this.login_window.dispose();
+		
+		// Set the root app login status and related meta.
+		((Application) this.root).set_loggedin(true);
+		((Application) this.root).set_username(username);
+		
+		((Application) this.root).login_complete(); 
 	}
 	
 	/**
@@ -115,41 +135,10 @@ public class AccountManager {
 	 * window.
 	 */
 	public void incorrect_login(){
-		// Create and display a dialog.
-		JFrame window = new JFrame();
-		window.setTitle("Incorrect Login!");
-		window.setVisible(true);
-		window.setAlwaysOnTop(true);
-		window.setSize(600, 300);
-		window.setResizable(false);
-		
-		// Create the container panel for the content of the dialog. 
-		JPanel master_panel = new JPanel();
-		master_panel.setLayout(new GridLayout(3, 1));
-		master_panel.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
-		
-		// Display the error icon.
-		ImageIcon error_icon = new ImageIcon(new ImageIcon(this.getClass().getResource("resources/icons/error.png")).getImage().getScaledInstance(90, 90, Image.SCALE_SMOOTH));
-		JLabel error = new JLabel(error_icon);
-		master_panel.add(error);
-		
-		// Display the text
-		JLabel text = new JLabel("Your username or password is incorrect.", SwingConstants.CENTER);
-		text.setFont(new Font(text.getFont().getFontName(), Font.BOLD, 20));
-		master_panel.add(text);
-		
-		// Display the close button.
-		JButton close = new JButton("Close");
-		close.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e){
-				// Close the dialog.
-				window.dispose();
-			}
-		});
-		master_panel.add(close);
-		
-		window.setContentPane(master_panel);
-		window.show();
+		// Update the login title to display an error.
+		this.login_title.setText("Incorrect Login Details.");
+		this.login_title.setForeground(Color.RED);
+		this.login_title.setFont(new Font(login_title.getFont().getFontName(), Font.BOLD, login_title.getFont().getSize()));
 	}
 	
 	/**
@@ -158,15 +147,48 @@ public class AccountManager {
 	 * @param String password The users password, 
 	 */
 	public void validate_login(String username, String password){
-//		if(username != "" && password != ""){
-//			
-//		}
-//		else{
-//			/* Login is incorrect */
-//			this.incorrect_login();
-//		}
+		// Check the users login within the database.
+		Database db = new Database();
+		Statement query = null;
 		
-		this.incorrect_login();
+		try {
+			query = db.get().createStatement();
+		} catch (SQLException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
+		try{
+			// Generate the sql string
+			String sql_string = "SELECT * FROM Accounts WHERE Username = '";
+			sql_string += username;
+			sql_string += "' AND Password = '";
+			sql_string += password;
+			sql_string += "'";
+			
+			ResultSet result = query.executeQuery(sql_string);
+			
+			// Work out the length of the found accounts.
+			int length = 0;
+			while(result.next()){
+				length++;
+			}
+			
+			System.out.println(sql_string);
+			
+			// Check if the users login is correct.
+			if(length > 0){
+				// Hide the login window.
+				this.login_correct(username);
+			}
+			else{
+				this.incorrect_login();
+			}
+			
+		}
+		catch(Exception e){
+			e.printStackTrace();
+		}
 	}
 	
 	/*
@@ -192,6 +214,9 @@ public class AccountManager {
 		JLabel logo = new JLabel();
 		logo.setIcon(image);
 		master_panel.add(logo);
+		
+		// Add the login title to the master panel.
+		master_panel.add(this.login_title);
 		
 		// Create the new content pane for the login items.
 		// this will be within the master panel.
